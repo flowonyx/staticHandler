@@ -1,3 +1,8 @@
+/*
+staticsite -d {directory path} -p {prefix} -d {another directory} -p {its prefix}
+
+Allows quick static site or file serving sites.
+*/
 package main
 
 import (
@@ -15,8 +20,9 @@ func main() {
 
 	app := cli.App("File Server", "Serves files from a list of directories")
 
-	app.Spec = "(-dp)..."
+	app.Spec = "[--port] (-dp)..."
 
+	port := app.IntOpt("port", 8888, "Port under which to run")
 	dirs := app.StringsOpt("d dir", []string{}, "Directory to serve.")
 	prefixes := app.StringsOpt("p prefix", []string{}, "Prefix under which to serve files from this directory.")
 
@@ -37,8 +43,9 @@ func main() {
 			static := staticHandler.NewFileOnlyHandler(dir, prefix)
 			http.Handle(prefix, static)
 		}
-		// http.Handle("/", http.FileServer(http.Dir(".")))
-		http.ListenAndServe(":9994", nil)
+		colonPort := fmt.Sprintf(":%d", *port)
+		fmt.Println("Listening on port", *port)
+		http.ListenAndServe(colonPort, nil)
 	}
 
 	app.Run(os.Args)
