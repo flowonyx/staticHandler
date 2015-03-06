@@ -11,8 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"bitbucket.org/unclespike/fileserver"
-
+	"github.com/flowonxy/staticHandler"
 	"github.com/jawher/mow.cli"
 )
 
