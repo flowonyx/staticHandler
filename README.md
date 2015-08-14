@@ -9,4 +9,4 @@ For an example of how to use this library, look at `cmd/staticsite/main.go`.
 
 Basically, `staticHandler.NewFileOnlyHandler(root, stripPrefix)` returns an http.Handler. The `stripPrefix` parameter is the string prefix you want to strip off when serving requests. You can leave it as an empty string if you don't want to strip any prefix.
 
-Also of note, is that it will look for a custom error page when there is an error (generally 404.html). If it is not there, it will serve an ugly "404: Not Found" message.
+Also of note, is that it will look for a custom error page when there is an error ({error code}.html). It also allows setting the HTML for each error code through the `SetErrorPage` function. You can also set the `ErrorPageHandler` to a custom function for serving error pages.
