@@ -18,6 +18,9 @@ type FileOnlyHandler struct {
 	StripPrefix string
 }
 
+// ErrorPageHandler allows for setting a custom handler for error pages.
+var ErrorPageHandler func(w http.ResponseWriter, r *http.Request, code int)
+
 // Keeps the HTML for each error response, if the user sets it.
 var errorPages = make(map[int]string)
 
@@ -36,6 +39,11 @@ func hasErrorPage(root string, code int) bool {
 }
 
 func handleErrorPage(w http.ResponseWriter, r *http.Request, root string, code int) {
+
+	if ErrorPageHandler != nil {
+		ErrorPageHandler(w, r, code)
+		return
+	}
 
 	w.WriteHeader(code)
 
