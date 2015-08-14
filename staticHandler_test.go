@@ -42,3 +42,29 @@ func TestServeFileWithDirectory(t *testing.T) {
 	}
 
 }
+
+func TestErrorPageHandler(t *testing.T) {
+
+	s := httptest.NewServer(NewFileOnlyHandler(".", ""))
+	defer s.Close()
+
+	SetErrorPage(404, "Testing 404!!!")
+
+	res, err := http.Get(s.URL + "/")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 404 {
+		t.Error("Should have recieved 404!")
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Error(err)
+	}
+	if string(body) != "Testing 404!!!" {
+		t.Error("Did not return correct file contents:", string(body))
+	}
+
+}

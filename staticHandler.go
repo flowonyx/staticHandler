@@ -11,6 +11,21 @@ import (
 	"strings"
 )
 
+// FileOnlyHandler provides a static server for serving only files and not
+// directory listings.
+type FileOnlyHandler struct {
+	Root        string
+	StripPrefix string
+}
+
+// Keeps the HTML for each error response, if the user sets it.
+var errorPages = make(map[int]string)
+
+// SetErrorPage allows for directly setting the HTML for each error code.
+func SetErrorPage(code int, html string) {
+	errorPages[code] = html
+}
+
 func hasErrorPage(root string, code int) bool {
 
 	errCode := strconv.Itoa(code)
@@ -23,6 +38,16 @@ func hasErrorPage(root string, code int) bool {
 func handleErrorPage(w http.ResponseWriter, r *http.Request, root string, code int) {
 
 	w.WriteHeader(code)
+
+	// If the HTML has been provide for this error, render it and return.
+	if errorPages != nil {
+		if html, ok := errorPages[code]; ok {
+			w.Write([]byte(html))
+			return
+		}
+	}
+
+	// If the HTML has not been provided, look for an HTML page for this error.
 	sCode := strconv.Itoa(code)
 	fullpath := filepath.Join(root, sCode+".html")
 	if hasErrorPage(root, code) {
@@ -36,6 +61,7 @@ func handleErrorPage(w http.ResponseWriter, r *http.Request, root string, code i
 		return
 	}
 
+	// If no HTML or HTML page is available for this error, use this default HTML.
 	w.Write([]byte(`
 <!doctype html>
 <html>
@@ -71,13 +97,6 @@ func ServeFileOnly(w http.ResponseWriter, r *http.Request, root string, name str
 	}
 
 	http.ServeFile(w, r, fullpath)
-}
-
-// FileOnlyHandler provides a static server for serving only files and not
-// directory listings.
-type FileOnlyHandler struct {
-	Root        string
-	StripPrefix string
 }
 
 func (fh *FileOnlyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
